@@ -1,4 +1,4 @@
-namespace TmsApi.DTOs;
+namespace TmsApi.Dtos;
 
 public class PagedResult<T>
 {

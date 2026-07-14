@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\HP\\OneDrive\\Desktop\\AAU5\\TMSApi\\TmsApi.csproj": {}
+    "C:\\Users\\HP\\OneDrive\\Desktop\\AAU6\\TMSApi\\TmsApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\HP\\OneDrive\\Desktop\\AAU5\\TMSApi\\TmsApi.csproj": {
+    "C:\\Users\\HP\\OneDrive\\Desktop\\AAU6\\TMSApi\\TmsApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU5\\TMSApi\\TmsApi.csproj",
+        "projectUniqueName": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU6\\TMSApi\\TmsApi.csproj",
         "projectName": "TmsApi",
-        "projectPath": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU5\\TMSApi\\TmsApi.csproj",
+        "projectPath": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU6\\TMSApi\\TmsApi.csproj",
         "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU5\\TMSApi\\obj\\",
+        "outputPath": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU6\\TMSApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

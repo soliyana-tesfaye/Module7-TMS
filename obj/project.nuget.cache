@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "nEYrsfgPEg8=",
+  "dgSpecHash": "ZdzrKRAy5eQ=",
   "success": true,
-  "projectFilePath": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU5\\TMSApi\\TmsApi.csproj",
+  "projectFilePath": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU6\\TMSApi\\TmsApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\HP\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\HP\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.9\\microsoft.aspnetcore.openapi.10.0.9.nupkg.sha512",
@@ -35,5 +35,18 @@
     "C:\\Users\\HP\\.nuget\\packages\\system.composition.runtime\\9.0.0\\system.composition.runtime.9.0.0.nupkg.sha512",
     "C:\\Users\\HP\\.nuget\\packages\\system.composition.typedparts\\9.0.0\\system.composition.typedparts.9.0.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
+      "projectPath": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU6\\TMSApi\\TmsApi.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\HP\\OneDrive\\Desktop\\AAU6\\TMSApi\\TmsApi.csproj",
+      "libraryId": "Microsoft.OpenApi",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

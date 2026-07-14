@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TmsApi.Data;
-using TmsApi.DTOs;
+using TmsApi.Dtos;
 using TmsApi.Entities;
 
 namespace TmsApi.Controllers;
@@ -17,9 +17,9 @@ public class StudentsController : ControllerBase
         _context = context;
     }
 
-    // =========================================
-    // 1. GET ALL STUDENTS
-    // =========================================
+    // =========================
+    // GET ALL STUDENTS
+    // =========================
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
     {
@@ -30,9 +30,9 @@ public class StudentsController : ControllerBase
         return Ok(students);
     }
 
-    // =========================================
-    // 2. PAGINATION
-    // =========================================
+    // =========================
+    // PAGINATION
+    // =========================
     [HttpGet("paged")]
     public async Task<ActionResult<PagedResult<StudentDto>>> GetPagedStudents(
         int page = 1,
@@ -69,9 +69,9 @@ public class StudentsController : ControllerBase
         });
     }
 
-    // =========================================
-    // 3. TOP COURSES
-    // =========================================
+    // =========================
+    // TOP COURSES
+    // =========================
     [HttpGet("top-courses")]
     public async Task<ActionResult> GetTopCourses()
     {
@@ -90,9 +90,42 @@ public class StudentsController : ControllerBase
         return Ok(result);
     }
 
-    // =========================================
-    // 4. CREATE STUDENT (POST)
-    // =========================================
+    // =========================
+    // STUDENT REPORT (N+1 FIXED)
+    // =========================
+    [HttpGet("student-report")]
+    public async Task<ActionResult> GetStudentReport()
+    {
+        var report = await _context.Students
+            .AsNoTracking()
+            .Select(s => new
+            {
+                s.Name,
+                EnrollmentCount = s.Enrollments.Count
+            })
+            .ToListAsync();
+
+       // return Ok(report);
+       var students = await _context.Students
+    .AsNoTracking()
+    .Select(s => new StudentDto
+    {
+        Id = s.Id,
+        RegistrationNumber = s.RegistrationNumber,
+        Name = s.Name,
+        GPA = s.GPA,
+        IsActive = s.IsActive,
+
+        Version = EF.Property<uint>(s, "xmin")
+    })
+    .ToListAsync();
+
+return Ok(students);
+    }
+
+    // =========================
+    // CREATE STUDENT
+    // =========================
     [HttpPost]
     public async Task<ActionResult> CreateStudent([FromBody] StudentDto dto)
     {
@@ -111,8 +144,71 @@ public class StudentsController : ControllerBase
         };
 
         _context.Students.Add(student);
+
+        // Shadow property
+        _context.Entry(student)
+            .Property("LastUpdated")
+            .CurrentValue = DateTime.UtcNow;
+
         await _context.SaveChangesAsync();
 
         return Ok(student);
     }
+
+    // =========================
+    // UPDATE STUDENT
+    // =========================
+    [HttpPut("{id}")]
+public async Task<ActionResult> UpdateStudent(int id, StudentDto dto)
+{
+    var student = await _context.Students.FindAsync(id);
+
+    if (student == null)
+        return NotFound();
+
+    student.RegistrationNumber = dto.RegistrationNumber;
+    student.Name = dto.Name;
+    student.GPA = dto.GPA;
+    student.IsActive = dto.IsActive;
+
+    _context.Entry(student)
+        .Property("LastUpdated")
+        .CurrentValue = DateTime.UtcNow;
+
+    try
+    {
+        await _context.SaveChangesAsync();
+    }
+    catch (DbUpdateConcurrencyException)
+    {
+        return Conflict("This record was modified by another user.");
+    }
+
+    return Ok(student);
+}
+
+
+[HttpGet("admin")]
+public async Task<ActionResult<IEnumerable<Student>>> GetAllStudentsAdmin()
+{
+    var students = await _context.Students
+        .IgnoreQueryFilters()
+        .AsNoTracking()
+        .ToListAsync();
+
+    return Ok(students);
+}
+
+[HttpPost("archive-enrollments")]
+public async Task<ActionResult> ArchiveEnrollments()
+{
+    var cutoff = DateTime.UtcNow.AddYears(-1);
+
+    var rows = await _context.Enrollments
+        .Where(e => e.EnrolledAt < cutoff)
+        .ExecuteUpdateAsync(s =>
+            s.SetProperty(e => e.IsArchived, true));
+
+    return Ok($"{rows} enrollments archived.");
+}
 }

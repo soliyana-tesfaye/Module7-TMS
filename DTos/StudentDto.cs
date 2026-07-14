@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TmsApi.DTOs;
+namespace TmsApi.Dtos;
 
 public class StudentDto
 {
@@ -14,4 +14,6 @@ public class StudentDto
 
     public decimal GPA { get; set; }
     public bool IsActive { get; set; }
+
+    public uint Version { get; set; }
 }
