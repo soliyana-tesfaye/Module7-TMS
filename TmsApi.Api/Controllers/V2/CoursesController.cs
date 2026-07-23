@@ -7,6 +7,7 @@ namespace TmsApi.Api.Controllers.V2;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/courses")]
+[Route("api/courses")]
 [ApiVersion("2.0")]
 [ApiExplorerSettings(GroupName = "v2")]
 

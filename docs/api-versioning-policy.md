@@ -100,6 +100,25 @@ Each major API version is independently supported according to the versioning po
 
 ---
 
+## 7. Header-Based Versioning
+
+The TMS API primarily uses URL segment versioning because it is visible during debugging and incident response.
+
+Example:
+
+- `/api/v1/courses`
+- `/api/v2/courses`
+
+For selected partners, header-based versioning is supported as an alternative:
+
+GET /api/courses
+X-Api-Version: 2.0
+
+
+Header-based versioning is a partner-by-partner opt-in mechanism and does not replace URL versioning as the default approach.
+
+URL versioning remains the recommended method because the API version is immediately visible in logs, monitoring tools, and support investigations.
+
 ## Summary
 
 The TMS API follows semantic versioning principles by introducing new major versions only for breaking changes, allowing additive improvements within existing versions, supporting older versions for at least six months, communicating changes clearly, and allowing clients to migrate directly to any supported API version.
