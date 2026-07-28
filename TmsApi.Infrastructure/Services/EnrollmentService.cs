@@ -35,6 +35,37 @@ public class EnrollmentService : IEnrollmentService
                 e.EnrolledAt))
             .FirstOrDefaultAsync(ct);
     }
+public async Task<bool> ExistsAsync(
+    int studentId,
+    string courseCode,
+    CancellationToken ct)
+{
+    return await _context.Enrollments
+        .AnyAsync(
+            e =>
+                e.StudentId == studentId &&
+                e.Course.Code == courseCode,
+            ct);
+}
+
+public async Task AddAsync(
+    Enrollment enrollment,
+    CancellationToken ct)
+{
+    _context.Enrollments.Add(enrollment);
+
+    await _context.SaveChangesAsync(ct);
+}
+
+public async Task<List<Enrollment>> GetByStudentIdAsync(
+    int studentId,
+    CancellationToken ct)
+{
+    return await _context.Enrollments
+        .Include(e => e.Course)
+        .Where(e => e.StudentId == studentId)
+        .ToListAsync(ct);
+}
 
     public async Task<EnrollmentResponseDto> CreateAsync(
         int courseId,

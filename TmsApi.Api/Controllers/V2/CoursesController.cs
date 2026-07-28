@@ -1,7 +1,6 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TmsApi.Infrastructure.Persistence;
+using TmsApi.Application.Interfaces;
 
 namespace TmsApi.Api.Controllers.V2;
 
@@ -11,86 +10,28 @@ namespace TmsApi.Api.Controllers.V2;
 [ApiVersion("2.0")]
 [ApiExplorerSettings(GroupName = "v2")]
 
-public class CoursesController(TmsDbContext context) : ControllerBase
+public class CoursesController(
+    ICachedCourseService cachedCourseService) : ControllerBase
 {
-    [HttpGet("{id}")]
-public async Task<IActionResult> GetCourse(
-    int id,
-    CancellationToken ct)
-{
-    var course = await context.Courses
-        .AsNoTracking()
-        .Where(c => c.Id == id)
-        .Select(c => new
-        {
-            c.Id,
-            c.Code,
-            c.Title,
-            c.MaxCapacity,
-            EnrollmentCount = c.Enrollments.Count
-        })
-        .FirstOrDefaultAsync(ct);
+    [HttpGet("{code}")]
+    public async Task<IActionResult> GetCourse(
+        string code,
+        CancellationToken ct)
+    {
+        var course = await cachedCourseService
+            .GetCourseAsync(code, ct);
 
-    if (course == null)
-        return NotFound();
+        return Ok(course);
+    }
 
-    return Ok(course);
-}
+
     [HttpGet]
     public async Task<IActionResult> GetCourses(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20,
-        CancellationToken ct = default)
+        CancellationToken ct)
     {
-        page = Math.Max(1, page);
-        pageSize = Math.Clamp(pageSize, 1, 50);
+        var courses = await cachedCourseService
+            .GetAllCoursesAsync(ct);
 
-        var baseQuery = context.Courses.AsNoTracking();
-
-        var totalCount = await baseQuery.CountAsync(ct);
-
-        var rows = await baseQuery
-            .OrderBy(c => c.Title)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(c => new
-            {
-                c.Id,
-                c.Title,
-                c.Code,
-                c.MaxCapacity,
-                EnrollmentCount = c.Enrollments.Count
-            })
-            .ToListAsync(ct);
-
-        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
-        var hasNext = page < totalPages;
-        var hasPrevious = page > 1;
-
-        return Ok(new
-        {
-            data = rows,
-            meta = new
-            {
-                totalCount,
-                page,
-                pageSize,
-                totalPages,
-                hasNext,
-                hasPrevious
-            },
-            links = new
-            {
-                self = $"/api/v2/courses?page={page}&pageSize={pageSize}",
-                next = hasNext
-                    ? $"/api/v2/courses?page={page + 1}&pageSize={pageSize}"
-                    : (string?)null,
-                prev = hasPrevious
-                    ? $"/api/v2/courses?page={page - 1}&pageSize={pageSize}"
-                    : (string?)null,
-                enroll = "/api/v2/enrollments"
-            }
-        });
+        return Ok(courses);
     }
 }

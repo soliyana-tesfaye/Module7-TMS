@@ -2,21 +2,21 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using TmsApi.Application.Dtos;
 using TmsApi.Application.Interfaces;
+
 namespace TmsApi.Api.Controllers;
 
 [ApiController]
 [Route("api/v{version:apiVersion}/courses/{courseId:int}/enrollments")]
 [ApiVersion("1.0")]
 [ApiExplorerSettings(GroupName = "v1")]
-//[Route("api/courses/{courseId:int}/enrollments")]
 [Tags("Enrollments")]
 [Produces("application/json")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public class EnrollmentsController(
     IEnrollmentService enrollmentService,
-    ICourseService courseService) : ControllerBase
+    ICourseService courseService,
+    ICachedCourseService cachedCourseService) : ControllerBase
 {
-
 
     [HttpGet("{id:int}", Name = nameof(GetEnrollment))]
     [ProducesResponseType(typeof(EnrollmentResponseDto), StatusCodes.Status200OK)]
@@ -29,12 +29,10 @@ public class EnrollmentsController(
     {
         var enrollment = await enrollmentService.GetByIdAsync(courseId, id, ct);
 
-
         return enrollment is not null
             ? Ok(enrollment)
             : NotFound();
     }
-
 
 
     [HttpGet(Name = "ListCourseEnrollments")]
@@ -47,19 +45,15 @@ public class EnrollmentsController(
     {
         var course = await courseService.GetByIdAsync(courseId, ct);
 
-
         if (course is null)
         {
             return NotFound();
         }
 
-
         var result = await enrollmentService.GetByCourseAsync(courseId, ct);
-
 
         return Ok(result);
     }
-
 
 
     [HttpPost]
@@ -74,15 +68,12 @@ public class EnrollmentsController(
         EnrollStudentRequest request,
         CancellationToken ct)
     {
-
         var course = await courseService.GetByIdAsync(courseId, ct);
-
 
         if (course is null)
         {
             return NotFound();
         }
-
 
         if (course.EnrollmentCount >= course.MaxCapacity)
         {
@@ -94,9 +85,10 @@ public class EnrollmentsController(
             });
         }
 
-
         var enrollment = await enrollmentService.CreateAsync(courseId, request, ct);
 
+        // Invalidate cached courses because EnrollmentCount changed
+        await cachedCourseService.InvalidateCourseCacheAsync(ct);
 
         return CreatedAtAction(
             nameof(GetEnrollment),

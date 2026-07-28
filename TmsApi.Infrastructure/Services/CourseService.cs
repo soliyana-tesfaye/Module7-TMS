@@ -21,6 +21,17 @@ public class CourseService : ICourseService
         _logger = logger;
     }
 
+public async Task<Course?> GetByCodeAsync(
+    string code,
+    CancellationToken ct)
+{
+    return await _context.Courses
+        .Include(c => c.Enrollments)
+        .FirstOrDefaultAsync(
+            c => c.Code == code,
+            ct);
+}
+
     public Task<CourseResponseDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         return _context.Courses
